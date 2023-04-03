@@ -1,0 +1,61 @@
+// Opos-device-manager-atl.idl : IDL source for Opos-device-manager-atl
+//
+
+// This file will be processed by the MIDL tool to
+// produce the type library (Oposdevicemanageratl.tlb) and marshalling code.
+
+import "oaidl.idl";
+import "ocidl.idl";
+
+[
+	object,
+	uuid(2f1ee96f-1a60-4954-9ddd-c475b974253c),
+	dual,
+	nonextensible,
+	pointer_default(unique)
+]
+interface IOposDeviceManager : IDispatch
+{
+	HRESULT StartScanner();
+	HRESULT StopScanner();
+};
+[
+	uuid(FD22695F-84FF-427B-B763-B1DD8376E37E),
+	nonextensible,
+	oleautomation,
+	hidden,
+	version(1.0)
+]
+interface IMyDeviceManagerEvents : IUnknown
+{
+	HRESULT OnDataEvent([in] BSTR data);
+	HRESULT OnErrorEvent([in] BSTR errorMessage);
+};
+
+[
+	uuid(fc266689-1baa-4157-a847-23daab7348ac),
+	version(1.0),
+]
+library OposdevicemanageratlLib
+{
+	importlib("stdole2.tlb");
+	[
+		uuid(47704e5b-bea7-4c8b-ada7-347e9515bdad)
+	]
+	dispinterface _IOposDeviceManagerEvents
+	{
+		properties:
+		methods:
+	};
+	[
+		uuid(3c4ad21c-1f81-46e5-9d7f-3573f8b6302f)
+	]
+	coclass OposDeviceManager
+	{
+		[default] interface IOposDeviceManager;
+		[default, source] dispinterface _IOposDeviceManagerEvents;
+		[source] interface IMyDeviceManagerEvents; // Add this line
+	};
+};
+
+import "shobjidl.idl";

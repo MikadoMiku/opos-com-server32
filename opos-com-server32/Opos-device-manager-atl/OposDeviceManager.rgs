@@ -1,0 +1,16 @@
+HKCR
+{
+	NoRemove CLSID
+	{
+		ForceRemove {3c4ad21c-1f81-46e5-9d7f-3573f8b6302f} = s 'OposDeviceManager class'
+		{
+			ForceRemove Programmable
+			LocalServer32 = s '%MODULE%'
+			{
+				val ServerExecutable = s '%MODULE_RAW%'
+			}
+			TypeLib = s '{fc266689-1baa-4157-a847-23daab7348ac}'
+			Version = s '1.0'
+		}
+	}
+}

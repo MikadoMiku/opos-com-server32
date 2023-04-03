@@ -1,91 +1,42 @@
-#include "DeviceManager.h"
-#include "Essential.h"
-#include "ScannerSink.h"
+// OposDeviceManager.cpp : Implementation of COposDeviceManager
 
-// Custom message loop events
-#define WM_STARTSCANNER (WM_USER + 1) // 1024 + 1
-#define WM_STOPSCANNER (WM_USER + 2) // 1024 + 2
+#include "pch.h"
 
-using namespace std;
+// COposDeviceManager
 
-DeviceManager::DeviceManager() {
+STDMETHODIMP COposDeviceManager::OnDataEvent(BSTR data)
+{
+	// Implement your logic here, for example, send the data to the client using the custom event
+	Fire_OnDataEvent(data);
+	return S_OK;
 }
 
-DeviceManager::~DeviceManager() {
-	for (auto& device : devices_)
-	{
-		device.second.device->Release();
-		device.second.connectionPoint->Unadvise(device.second.cookie);
-	}
-	devices_.clear();
 
-	CoUninitialize();
-}
-
-void DeviceManager::Start() {
-	HRESULT hr = CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
-	if (FAILED(hr))
-	{
-		throw runtime_error("Failed to initialize COM.");
-	}
-	std::cout << "Device manager started..." << std::endl;
-	MSG msg;
-	while (GetMessage(&msg, NULL, 0, 0)) {
-		TranslateMessage(&msg);
-		DispatchMessage(&msg);
-
-		// Process messages
-		if (msg.message == WM_STARTSCANNER) {
-			this->StartScanner();
-		}
-		else if (msg.message == WM_STOPSCANNER) {
-			this->StopScanner();
-		}
-	}
-}
-
-void DeviceManager::StartScanner() {
+STDMETHODIMP COposDeviceManager::StartScanner() {
+    // The existing code from DeviceManager::StartScanner goes here
+    // Replace `this->StartScanner()` with `StartScanner()`
+    // Replace any references to the DeviceManager class with COposDeviceManager
 	HRESULT hr;
-	//std::vector<std::string> keys =
-	//{
-	//    USBCOM_SCANNER_ANY,
-	//    USBOEM_SCANNER_HANDHELD,
-	//    USBOEM_SCANNER_FIXED_RETAIL,
-	//    RS232_SCANNER_ANY,
-	//    RS232SC_SCANNER_FIXED_RETAIL
-	//};
 
 	OposScanner_CCO::IOPOSScannerPtr scanner = nullptr;
 	hr = scanner.CreateInstance("OPOS.Scanner");
 
-	// Attempt to open and claim a scanner (first come, first serve).
-	//size_t index, count = keys.size();
-	//for (index = 0; index < count; ++index)
-	//{
-	//    scanner->Open(keys[index].c_str());
-	//    scanner->ClaimDevice(1000);
-	//    if (scanner->Claimed)
-	//        break;
-
-	//    scanner->Close();
-	//}
-
 	if (FAILED(hr))
 	{
-		throw runtime_error("Failed to create scanner instance.");
+		throw std::runtime_error("Failed to create scanner instance.");
 	}
 
 	hr = scanner->Open(L"USBScanner");
 	if (FAILED(hr))
 	{
-		throw runtime_error("Failed to open scanner.");
+		throw std::runtime_error("Failed to open scanner.");
 	}
 
 	hr = scanner->ClaimDevice(1000);
 	if (FAILED(hr))
 	{
 		scanner->Close();
-		throw runtime_error("Failed to claim scanner.");
+		throw std::runtime_error("Failed to claim scanner.");
 	}
 
 
@@ -127,10 +78,11 @@ void DeviceManager::StartScanner() {
 	}
 
 
-	wcout << "Scanner started." << endl;
+	std::cout << "Scanner started." << std::endl;
+    return S_OK;
 }
 
-void DeviceManager::StopScanner() {
+STDMETHODIMP COposDeviceManager::StopScanner() {
 	OposScanner_CCO::IOPOSScannerPtr scannerSmartPtr = nullptr;
 
 	std::string scannerName = "USBScanner";
@@ -148,37 +100,26 @@ void DeviceManager::StopScanner() {
 
 	if (scannerFound)
 	{
-		// OposScanner_CCO::IOPOSScannerPtr* scanner = dynamic_cast<OposScanner_CCO::IOPOSScannerPtr*>(scannerInfo.device);
-
 		HRESULT hr = scannerInfo.device->QueryInterface(__uuidof(OposScanner_CCO::IOPOSScanner), (void**)&scannerSmartPtr);
 		if (FAILED(hr))
 		{
-			throw runtime_error("Failed to get IOPOSScanner interface pointer.");
+			throw std::runtime_error("Failed to get IOPOSScanner interface pointer.");
 		}
-
-		// scannerSmartPtr = scanner->GetInterfacePtr();
 
 		scannerSmartPtr->ReleaseDevice();
 		scannerSmartPtr->Close();
 		scannerInfo.connectionPoint->Unadvise(scannerInfo.cookie);
-
-		// I think this is somehow release? Might be released when doing cp->Unadvise()
-		// The example i looked at did not have a separate release for it so that may be the case
-		//  getting access violation...
-		//if (scannerInfo.sink != nullptr && scannerInfo.sink != NULL) {
-		//	scannerInfo.sink->Release();
-		//}
-
 
 		devices_.erase(std::remove_if(devices_.begin(), devices_.end(), [&](const deviceInfoPair& devicePair) {
 			return devicePair.first == scannerName;
 			}), devices_.end());
 
 
-		wcout << "Scanner stopped." << endl;
+		std::cout << "Scanner stopped." << std::endl;
 	}
 	else
 	{
-		wcout << "No scanner to stop." << endl;
+		std::cout << "No scanner to stop." << std::endl;
 	}
+    return S_OK;
 }

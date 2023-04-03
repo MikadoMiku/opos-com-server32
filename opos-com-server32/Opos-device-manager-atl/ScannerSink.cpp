@@ -1,9 +1,10 @@
-#include "ScannerSink.h"
+#include "pch.h"
 
-ScannerSink::ScannerSink(OposScanner_CCO::IOPOSScanner& scannerObject, const std::string& profileName)
+ScannerSink::ScannerSink(COposDeviceManager* deviceManager, OposScanner_CCO::IOPOSScanner& scannerObject, const std::string& profileName)
 	: scanner(scannerObject)
 	, ifType(Undefined)
 	, ref(0)
+	, deviceManager_(deviceManager)
 {
 	if ((profileName == USBOEM_SCANNER_HANDHELD) || (profileName == USBOEM_SCANNER_FIXED_RETAIL))
 		ifType = UsbOem;
@@ -112,11 +113,18 @@ IFACEMETHODIMP ScannerSink::Invoke(DISPID dispid, REFIID riid, LCID lcid,
 // _IOPOSScannerEvents methods
 HRESULT ScannerSink::DataEvent(long Status)
 {
-	std::cout << "Data: " << static_cast<std::string>(scanner.ScanDataLabel) << std::endl;
+	// std::cout << "Data: " << static_cast<std::string>(scanner.ScanDataLabel) << std::endl;
 	// scanner.DataEventEnabled is set to false when a DataEvent is invoked
 	// and so the we must reset it to true to continue recieving DataEvents.
-	scanner.DataEventEnabled = true;
-	return S_OK;
+	// scanner.DataEventEnabled = true;
+	// return S_OK;
+	HRESULT hr = S_OK;
+	if (deviceManager_)
+	{
+		// Use bstrData for the OnDataEvent method
+		deviceManager_->OnDataEvent(scanner.ScanDataLabel);
+	}
+	return hr;
 }
 
 HRESULT ScannerSink::DirectIOEvent(long EventNumber, long* pData, BSTR* pString)
