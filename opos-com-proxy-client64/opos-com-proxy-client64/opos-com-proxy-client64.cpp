@@ -5,7 +5,12 @@
 #include <atlbase.h>
 #include <atlcom.h>
 #include <string>
+#include <thread>
+#include <mutex>
+#include <queue>
 
+std::queue<std::string> commandQueue;
+std::mutex commandQueueMutex;
 
 class CMyDeviceManagerEvents : public IMyDeviceManagerEvents
 {
@@ -44,21 +49,16 @@ public:
 	}
 };
 
-int main3() {
+void comThreadFunction() {
 	HRESULT hr = CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
 	if (FAILED(hr)) {
 		std::cerr << "Failed to initialize COM library." << std::endl;
-		return 1;
+		return;
 	}
 
-	// Your code to interact with the COM server goes here
 	CComPtr<IOposDeviceManager> spDeviceManager;
 	hr = spDeviceManager.CoCreateInstance(__uuidof(OposDeviceManager));
-	if (FAILED(hr)) {
-		std::cerr << "Failed to create an instance of the DeviceManager." << std::endl;
-		CoUninitialize();
-		return 1;
-	}
+	// ...
 
 	// Create an instance of your event handler class
 	CMyDeviceManagerEvents eventHandler;
@@ -75,89 +75,70 @@ int main3() {
 	DWORD dwCookie;
 	hr = spCP->Advise(&eventHandler, &dwCookie);
 
+
 	// Call a method of your COM server, e.g., StartScanner
 	hr = spDeviceManager->StartScanner();
-	if (SUCCEEDED(hr)) {
-		std::cout << "Scanner started successfully." << std::endl;
-	}
-	else {
-		std::cerr << "Failed to start the scanner." << std::endl;
+
+	// Run a loop to handle COM events and user commands
+	MSG msg;
+	while (true) {
+		while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
+			TranslateMessage(&msg);
+			DispatchMessage(&msg);
+		}
+
+		std::string command;
+		{
+			std::lock_guard<std::mutex> lock(commandQueueMutex);
+			if (!commandQueue.empty()) {
+				command = commandQueue.front();
+				commandQueue.pop();
+			}
+		}
+
+		if (!command.empty()) {
+			if (command == "q") {
+				hr = spDeviceManager->StopScanner();
+				break;
+			}
+
+			// Process the command and call the appropriate methods on the COM server
+		}
+
+		std::this_thread::sleep_for(std::chrono::milliseconds(10));
 	}
 
+	hr = spCP->Unadvise(dwCookie);
+
+	CoUninitialize();
+}
+
+void inputThreadFunction() {
 	std::string input;
 	while (true) {
 		std::cout << "Enter command (q to quit): ";
 		std::getline(std::cin, input);
 
+		if (input.empty()) {
+			continue;
+		}
+
+		std::lock_guard<std::mutex> lock(commandQueueMutex);
+		commandQueue.push(input);
+
 		if (input == "q") {
-			hr = spDeviceManager->StopScanner();
 			break;
 		}
-
-		// Process the input and call the appropriate methods on the COM server
-
-		// Pump messages to allow COM to marshal calls
-		MSG msg;
-		while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
-			TranslateMessage(&msg);
-			DispatchMessage(&msg);
-		}
 	}
-
-	// Unadvise the connection point
-	hr = spCP->Unadvise(dwCookie);
-
-	CoUninitialize();
-	std::cout << "Done." << std::endl;
-	return 0;
-
 }
 
 int main() {
-	HRESULT hr = CoInitializeEx(NULL, COINIT_MULTITHREADED);
-	if (FAILED(hr)) {
-		std::cerr << "Failed to initialize COM library." << std::endl;
-		return 1;
-	}
+	std::thread comThread(comThreadFunction);
+	std::thread inputThread(inputThreadFunction);
 
-	// Your code to interact with the COM server goes here
-	CComPtr<IOposDeviceManager> spDeviceManager;
-	hr = spDeviceManager.CoCreateInstance(__uuidof(OposDeviceManager));
-	if (FAILED(hr)) {
-		std::cerr << "Failed to create an instance of the DeviceManager." << std::endl;
-		CoUninitialize();
-		return 1;
-	}
+	comThread.join();
+	inputThread.join();
 
-	// Create an instance of your event handler class
-	CMyDeviceManagerEvents eventHandler;
-
-	// Query the COM object for the IConnectionPointContainer interface
-	CComPtr<IConnectionPointContainer> spCPC;
-	hr = spDeviceManager->QueryInterface(IID_IConnectionPointContainer, (void**)&spCPC);
-
-	// Find the connection point for the IMyDeviceManagerEvents interface
-	CComPtr<IConnectionPoint> spCP;
-	hr = spCPC->FindConnectionPoint(IID_IMyDeviceManagerEvents, &spCP);
-
-	// Advise the connection point with the event handler object
-	DWORD dwCookie;
-	hr = spCP->Advise(&eventHandler, &dwCookie);
-
-	// Call a method of your COM server, e.g., StartScanner
-	hr = spDeviceManager->StopScanner();
-	if (SUCCEEDED(hr)) {
-		std::cout << "Scanner stopped successfully." << std::endl;
-	}
-	else {
-		std::cerr << "Failed to stop the scanner." << std::endl;
-	}
-
-
-	// Unadvise the connection point
-	hr = spCP->Unadvise(dwCookie);
-
-	CoUninitialize();
 	std::cout << "Done." << std::endl;
 	return 0;
 }

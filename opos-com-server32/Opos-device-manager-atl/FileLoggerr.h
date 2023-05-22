@@ -14,7 +14,7 @@ inline std::string getCurrentDateTime(std::string s) {
 };
 
 inline void Logger(std::string logMsg) {
-    std::string filePath = "./log_" + getCurrentDateTime("date") + ".txt";
+    std::string filePath = "C:/Users/power/Downloads/logs/log_" + getCurrentDateTime("date") + ".txt";
     std::string now = getCurrentDateTime("now");
     std::ofstream ofs(filePath.c_str(), std::ios_base::out | std::ios_base::app);
     ofs << now << '\t' << logMsg << '\n';

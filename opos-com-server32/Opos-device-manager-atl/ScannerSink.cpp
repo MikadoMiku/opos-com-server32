@@ -1,4 +1,5 @@
 #include "pch.h"
+#include "FileLoggerr.h"
 
 ScannerSink::ScannerSink(COposDeviceManager* deviceManager, OposScanner_CCO::IOPOSScanner& scannerObject, const std::string& profileName)
 	: scanner(scannerObject)
@@ -113,7 +114,7 @@ IFACEMETHODIMP ScannerSink::Invoke(DISPID dispid, REFIID riid, LCID lcid,
 // _IOPOSScannerEvents methods
 HRESULT ScannerSink::DataEvent(long Status)
 {
-
+	Logger("Data: " + static_cast<std::string>(scanner.ScanDataLabel));
 
 	// std::cout << "Data: " << static_cast<std::string>(scanner.ScanDataLabel) << std::endl;
 	// scanner.DataEventEnabled is set to false when a DataEvent is invoked
@@ -158,6 +159,7 @@ HRESULT ScannerSink::DataEvent(long Status)
 			}
 		}
 	}
+	scanner.DataEventEnabled = true;
 	return hr;
 }
 
