@@ -244,7 +244,7 @@ EXTERN_C const IID IID_IOposDeviceManager;
 #define __IMyDeviceManagerEvents_INTERFACE_DEFINED__
 
 /* interface IMyDeviceManagerEvents */
-/* [object][version][hidden][oleautomation][nonextensible][uuid] */ 
+/* [object][version][hidden][dual][oleautomation][nonextensible][uuid] */ 
 
 
 EXTERN_C const IID IID_IMyDeviceManagerEvents;
@@ -255,11 +255,8 @@ EXTERN_C const IID IID_IMyDeviceManagerEvents;
     IMyDeviceManagerEvents : public IUnknown
     {
     public:
-        virtual HRESULT STDMETHODCALLTYPE OnDataEvent( 
+        virtual /* [helpstring][id] */ HRESULT STDMETHODCALLTYPE OnDataEvent( 
             /* [in] */ BSTR data) = 0;
-        
-        virtual HRESULT STDMETHODCALLTYPE OnErrorEvent( 
-            /* [in] */ BSTR errorMessage) = 0;
         
     };
     
@@ -286,14 +283,9 @@ EXTERN_C const IID IID_IMyDeviceManagerEvents;
             IMyDeviceManagerEvents * This);
         
         DECLSPEC_XFGVIRT(IMyDeviceManagerEvents, OnDataEvent)
-        HRESULT ( STDMETHODCALLTYPE *OnDataEvent )( 
+        /* [helpstring][id] */ HRESULT ( STDMETHODCALLTYPE *OnDataEvent )( 
             IMyDeviceManagerEvents * This,
             /* [in] */ BSTR data);
-        
-        DECLSPEC_XFGVIRT(IMyDeviceManagerEvents, OnErrorEvent)
-        HRESULT ( STDMETHODCALLTYPE *OnErrorEvent )( 
-            IMyDeviceManagerEvents * This,
-            /* [in] */ BSTR errorMessage);
         
         END_INTERFACE
     } IMyDeviceManagerEventsVtbl;
@@ -320,9 +312,6 @@ EXTERN_C const IID IID_IMyDeviceManagerEvents;
 
 #define IMyDeviceManagerEvents_OnDataEvent(This,data)	\
     ( (This)->lpVtbl -> OnDataEvent(This,data) ) 
-
-#define IMyDeviceManagerEvents_OnErrorEvent(This,errorMessage)	\
-    ( (This)->lpVtbl -> OnErrorEvent(This,errorMessage) ) 
 
 #endif /* COBJMACROS */
 

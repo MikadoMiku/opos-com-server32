@@ -49,6 +49,9 @@
     <ClInclude Include="ScannerSink.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="FileLoggerr.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">

@@ -113,16 +113,50 @@ IFACEMETHODIMP ScannerSink::Invoke(DISPID dispid, REFIID riid, LCID lcid,
 // _IOPOSScannerEvents methods
 HRESULT ScannerSink::DataEvent(long Status)
 {
+
+
 	// std::cout << "Data: " << static_cast<std::string>(scanner.ScanDataLabel) << std::endl;
 	// scanner.DataEventEnabled is set to false when a DataEvent is invoked
 	// and so the we must reset it to true to continue recieving DataEvents.
 	// scanner.DataEventEnabled = true;
 	// return S_OK;
-	HRESULT hr = S_OK;
-	if (deviceManager_)
-	{
+	std::cout << "Data: " << static_cast<std::string>(scanner.ScanDataLabel) << std::endl;
+
+	// HRESULT hr = S_OK;
+	// if (deviceManager_)
+	// {
 		// Use bstrData for the OnDataEvent method
-		deviceManager_->OnDataEvent(scanner.ScanDataLabel);
+		// deviceManager_->OnDataEvent(scanner.ScanDataLabel);
+	// }
+	// return hr;
+
+	// In ScannerSink::DataEvent
+	_bstr_t scanDataLabel = scanner.ScanDataLabel;
+
+	CComPtr<IConnectionPointContainer> spCPC;
+	HRESULT hr = deviceManager_->QueryInterface(IID_IConnectionPointContainer, (void**)&spCPC);
+	if (SUCCEEDED(hr))
+	{
+		CComPtr<IConnectionPoint> spCP;
+		hr = spCPC->FindConnectionPoint(__uuidof(IMyDeviceManagerEvents), &spCP);
+		if (SUCCEEDED(hr))
+		{
+			CComPtr<IEnumConnections> spEnum;
+			hr = spCP->EnumConnections(&spEnum);
+			if (SUCCEEDED(hr))
+			{
+				CONNECTDATA cd = { 0 };
+				while (spEnum->Next(1, &cd, NULL) == S_OK)
+				{
+					IMyDeviceManagerEvents* pEvent = reinterpret_cast<IMyDeviceManagerEvents*>(cd.pUnk);
+					if (pEvent)
+					{
+						pEvent->OnDataEvent(scanDataLabel);
+						cd.pUnk->Release();
+					}
+				}
+			}
+		}
 	}
 	return hr;
 }

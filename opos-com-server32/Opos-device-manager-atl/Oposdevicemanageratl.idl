@@ -23,13 +23,14 @@ interface IOposDeviceManager : IDispatch
 	uuid(FD22695F-84FF-427B-B763-B1DD8376E37E),
 	nonextensible,
 	oleautomation,
+	dual,
+	odl,
 	hidden,
 	version(1.0)
 ]
-interface IMyDeviceManagerEvents : IUnknown
-{
+interface IMyDeviceManagerEvents : IUnknown {
+	[id(1), helpstring("method OnDataEvent")]
 	HRESULT OnDataEvent([in] BSTR data);
-	HRESULT OnErrorEvent([in] BSTR errorMessage);
 };
 
 [

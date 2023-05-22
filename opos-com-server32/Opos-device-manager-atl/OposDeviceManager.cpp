@@ -1,18 +1,10 @@
 // OposDeviceManager.cpp : Implementation of COposDeviceManager
 
 #include "pch.h"
-
-// COposDeviceManager
-
-STDMETHODIMP COposDeviceManager::OnDataEvent(BSTR data)
-{
-	// Implement your logic here, for example, send the data to the client using the custom event
-	Fire_OnDataEvent(data);
-	return S_OK;
-}
-
+#include "FileLoggerr.h"
 
 STDMETHODIMP COposDeviceManager::StartScanner() {
+	Logger("Scanner started...");
     // The existing code from DeviceManager::StartScanner goes here
     // Replace `this->StartScanner()` with `StartScanner()`
     // Replace any references to the DeviceManager class with COposDeviceManager
@@ -59,7 +51,7 @@ STDMETHODIMP COposDeviceManager::StartScanner() {
 			cpc->Release();
 
 			if (haveConnectionPoint) {
-				ScannerSink* sink = new ScannerSink(*scanner, "USBScanner");
+				ScannerSink* sink = new ScannerSink(this, *scanner, "USBScanner");
 
 				// Connect cp with sink (subscribe to the sink).
 				// cookie is a token representing the connection,

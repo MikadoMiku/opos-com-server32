@@ -213,6 +213,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Essential.h" />
+    <ClInclude Include="FileLoggerr.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="OposDeviceManager.h" />
     <ClInclude Include="Oposdevicemanageratl_i.h" />

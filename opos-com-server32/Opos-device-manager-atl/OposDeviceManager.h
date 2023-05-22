@@ -77,7 +77,12 @@ END_CONNECTION_POINT_MAP()
 	// Same methods as declared in the idl file
 	STDMETHOD(StartScanner)();
 	STDMETHOD(StopScanner)();
-	STDMETHOD(OnDataEvent)(BSTR data);
+
+	STDMETHOD(Fire_OnDataEvent)(BSTR bstrData) {
+		// Fire event
+		Fire_OnDataEvent(bstrData);
+		return S_OK;
+	}
 
 public:
 
