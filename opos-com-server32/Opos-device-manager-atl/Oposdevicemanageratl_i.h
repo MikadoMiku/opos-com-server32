@@ -114,6 +114,12 @@ EXTERN_C const IID IID_IOposDeviceManager;
         
         virtual HRESULT STDMETHODCALLTYPE StopScanner( void) = 0;
         
+        virtual HRESULT STDMETHODCALLTYPE EnableDataEvent( 
+            /* [in] */ BSTR deviceId) = 0;
+        
+        virtual HRESULT STDMETHODCALLTYPE DisableDataEvent( 
+            /* [in] */ BSTR deviceId) = 0;
+        
     };
     
     
@@ -187,6 +193,16 @@ EXTERN_C const IID IID_IOposDeviceManager;
         HRESULT ( STDMETHODCALLTYPE *StopScanner )( 
             IOposDeviceManager * This);
         
+        DECLSPEC_XFGVIRT(IOposDeviceManager, EnableDataEvent)
+        HRESULT ( STDMETHODCALLTYPE *EnableDataEvent )( 
+            IOposDeviceManager * This,
+            /* [in] */ BSTR deviceId);
+        
+        DECLSPEC_XFGVIRT(IOposDeviceManager, DisableDataEvent)
+        HRESULT ( STDMETHODCALLTYPE *DisableDataEvent )( 
+            IOposDeviceManager * This,
+            /* [in] */ BSTR deviceId);
+        
         END_INTERFACE
     } IOposDeviceManagerVtbl;
 
@@ -228,6 +244,12 @@ EXTERN_C const IID IID_IOposDeviceManager;
 
 #define IOposDeviceManager_StopScanner(This)	\
     ( (This)->lpVtbl -> StopScanner(This) ) 
+
+#define IOposDeviceManager_EnableDataEvent(This,deviceId)	\
+    ( (This)->lpVtbl -> EnableDataEvent(This,deviceId) ) 
+
+#define IOposDeviceManager_DisableDataEvent(This,deviceId)	\
+    ( (This)->lpVtbl -> DisableDataEvent(This,deviceId) ) 
 
 #endif /* COBJMACROS */
 

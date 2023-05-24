@@ -12,6 +12,12 @@
 std::queue<std::string> commandQueue;
 std::mutex commandQueueMutex;
 
+enum ThreadMessage {
+	EnableDataEvent = WM_USER + 1,
+	DisableDataEvent = WM_USER +2
+};
+
+
 class CMyDeviceManagerEvents : public IMyDeviceManagerEvents
 {
 public:
@@ -100,6 +106,16 @@ void comThreadFunction() {
 			if (command == "q") {
 				hr = spDeviceManager->StopScanner();
 				break;
+			}
+			else if (command == "enableDataEvents") {
+				BSTR bstr = SysAllocString(L"device");
+				hr = spDeviceManager->EnableDataEvent(bstr);
+				SysFreeString(bstr);
+			}
+			else if (command == "disableDataEvents") {
+				BSTR bstr = SysAllocString(L"device");
+				hr = spDeviceManager->DisableDataEvent(bstr);
+				SysFreeString(bstr);
 			}
 
 			// Process the command and call the appropriate methods on the COM server

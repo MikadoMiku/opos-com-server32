@@ -28,7 +28,8 @@ public:
     HRESULT DirectIOEvent(long EventNumber, long* Data, BSTR* String);
     HRESULT ErrorEvent(long ResultCode, long ResultCodeExtended, long ErrorLocus, long* ErrorResponse);
     HRESULT StatusUpdateEvent(long Data);
-
+    HRESULT DisableDataEvents();
+    HRESULT EnableDataEvents();
     void GoodBeep();
 
 private:

@@ -77,6 +77,8 @@ END_CONNECTION_POINT_MAP()
 	// Same methods as declared in the idl file
 	STDMETHOD(StartScanner)();
 	STDMETHOD(StopScanner)();
+	STDMETHOD(EnableDataEvent)(BSTR deviceId);
+	STDMETHOD(DisableDataEvent)(BSTR deviceId);
 
 	STDMETHOD(Fire_OnDataEvent)(BSTR bstrData) {
 		// Fire event

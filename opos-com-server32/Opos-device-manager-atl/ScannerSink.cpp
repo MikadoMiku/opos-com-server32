@@ -15,6 +15,19 @@ ScannerSink::ScannerSink(COposDeviceManager* deviceManager, OposScanner_CCO::IOP
 		ifType = SingleCable;
 }
 
+HRESULT ScannerSink::EnableDataEvents() {
+	// scanner.DataEventEnabled = true;
+	scanner.PutDeviceEnabled(true);
+	return S_OK;
+}
+
+HRESULT ScannerSink::DisableDataEvents() {
+	// scanner.DataEventEnabled = false;
+	scanner.PutDeviceEnabled(false);
+	return S_OK;
+}
+
+
 // IUnknown methods
 // Returns a pointer to a scanner sink interface for this object, allowing
 // the COM object to call this.Invoke()

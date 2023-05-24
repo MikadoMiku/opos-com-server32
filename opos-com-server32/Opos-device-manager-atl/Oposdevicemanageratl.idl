@@ -18,6 +18,8 @@ interface IOposDeviceManager : IDispatch
 {
 	HRESULT StartScanner();
 	HRESULT StopScanner();
+	HRESULT EnableDataEvent([in] BSTR deviceId);
+	HRESULT DisableDataEvent([in] BSTR deviceId);
 };
 [
 	uuid(FD22695F-84FF-427B-B763-B1DD8376E37E),

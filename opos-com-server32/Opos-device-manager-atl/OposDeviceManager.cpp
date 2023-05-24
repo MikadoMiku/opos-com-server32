@@ -3,6 +3,31 @@
 #include "pch.h"
 #include "FileLoggerr.h"
 
+STDMETHODIMP COposDeviceManager::EnableDataEvent(BSTR deviceId) {
+	for (auto& device : devices_)
+	{
+		if (device.first == "USBScanner") {
+			ScannerSink* sink = static_cast<ScannerSink*>(device.second.sink);
+			sink->EnableDataEvents();
+			break;
+		}
+	}
+	return S_OK;
+}
+
+STDMETHODIMP COposDeviceManager::DisableDataEvent(BSTR deviceId) {
+	for (auto& device : devices_)
+	{
+		if (device.first == "USBScanner") {
+			ScannerSink* sink = static_cast<ScannerSink*>(device.second.sink);
+			sink->DisableDataEvents();
+			break;
+		}
+	}
+	return S_OK;
+}
+
+
 STDMETHODIMP COposDeviceManager::StartScanner() {
 	Logger("Scanner started...");
     // The existing code from DeviceManager::StartScanner goes here
