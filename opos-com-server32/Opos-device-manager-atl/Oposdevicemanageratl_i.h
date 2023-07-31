@@ -110,15 +110,19 @@ EXTERN_C const IID IID_IOposDeviceManager;
     IOposDeviceManager : public IDispatch
     {
     public:
-        virtual HRESULT STDMETHODCALLTYPE StartScanner( void) = 0;
+        virtual HRESULT STDMETHODCALLTYPE StartScanner( 
+            /* [in] */ BSTR commandId) = 0;
         
-        virtual HRESULT STDMETHODCALLTYPE StopScanner( void) = 0;
+        virtual HRESULT STDMETHODCALLTYPE StopScanner( 
+            /* [in] */ BSTR commandId) = 0;
         
         virtual HRESULT STDMETHODCALLTYPE EnableDataEvent( 
-            /* [in] */ BSTR deviceId) = 0;
+            /* [in] */ BSTR deviceId,
+            /* [in] */ BSTR commandId) = 0;
         
         virtual HRESULT STDMETHODCALLTYPE DisableDataEvent( 
-            /* [in] */ BSTR deviceId) = 0;
+            /* [in] */ BSTR deviceId,
+            /* [in] */ BSTR commandId) = 0;
         
     };
     
@@ -187,21 +191,25 @@ EXTERN_C const IID IID_IOposDeviceManager;
         
         DECLSPEC_XFGVIRT(IOposDeviceManager, StartScanner)
         HRESULT ( STDMETHODCALLTYPE *StartScanner )( 
-            IOposDeviceManager * This);
+            IOposDeviceManager * This,
+            /* [in] */ BSTR commandId);
         
         DECLSPEC_XFGVIRT(IOposDeviceManager, StopScanner)
         HRESULT ( STDMETHODCALLTYPE *StopScanner )( 
-            IOposDeviceManager * This);
+            IOposDeviceManager * This,
+            /* [in] */ BSTR commandId);
         
         DECLSPEC_XFGVIRT(IOposDeviceManager, EnableDataEvent)
         HRESULT ( STDMETHODCALLTYPE *EnableDataEvent )( 
             IOposDeviceManager * This,
-            /* [in] */ BSTR deviceId);
+            /* [in] */ BSTR deviceId,
+            /* [in] */ BSTR commandId);
         
         DECLSPEC_XFGVIRT(IOposDeviceManager, DisableDataEvent)
         HRESULT ( STDMETHODCALLTYPE *DisableDataEvent )( 
             IOposDeviceManager * This,
-            /* [in] */ BSTR deviceId);
+            /* [in] */ BSTR deviceId,
+            /* [in] */ BSTR commandId);
         
         END_INTERFACE
     } IOposDeviceManagerVtbl;
@@ -239,17 +247,17 @@ EXTERN_C const IID IID_IOposDeviceManager;
     ( (This)->lpVtbl -> Invoke(This,dispIdMember,riid,lcid,wFlags,pDispParams,pVarResult,pExcepInfo,puArgErr) ) 
 
 
-#define IOposDeviceManager_StartScanner(This)	\
-    ( (This)->lpVtbl -> StartScanner(This) ) 
+#define IOposDeviceManager_StartScanner(This,commandId)	\
+    ( (This)->lpVtbl -> StartScanner(This,commandId) ) 
 
-#define IOposDeviceManager_StopScanner(This)	\
-    ( (This)->lpVtbl -> StopScanner(This) ) 
+#define IOposDeviceManager_StopScanner(This,commandId)	\
+    ( (This)->lpVtbl -> StopScanner(This,commandId) ) 
 
-#define IOposDeviceManager_EnableDataEvent(This,deviceId)	\
-    ( (This)->lpVtbl -> EnableDataEvent(This,deviceId) ) 
+#define IOposDeviceManager_EnableDataEvent(This,deviceId,commandId)	\
+    ( (This)->lpVtbl -> EnableDataEvent(This,deviceId,commandId) ) 
 
-#define IOposDeviceManager_DisableDataEvent(This,deviceId)	\
-    ( (This)->lpVtbl -> DisableDataEvent(This,deviceId) ) 
+#define IOposDeviceManager_DisableDataEvent(This,deviceId,commandId)	\
+    ( (This)->lpVtbl -> DisableDataEvent(This,deviceId,commandId) ) 
 
 #endif /* COBJMACROS */
 
@@ -280,6 +288,9 @@ EXTERN_C const IID IID_IMyDeviceManagerEvents;
         virtual /* [helpstring][id] */ HRESULT STDMETHODCALLTYPE OnDataEvent( 
             /* [in] */ BSTR data) = 0;
         
+        virtual /* [helpstring][id] */ HRESULT STDMETHODCALLTYPE OnCommandCompleted( 
+            /* [in] */ BSTR commandId) = 0;
+        
     };
     
     
@@ -309,6 +320,11 @@ EXTERN_C const IID IID_IMyDeviceManagerEvents;
             IMyDeviceManagerEvents * This,
             /* [in] */ BSTR data);
         
+        DECLSPEC_XFGVIRT(IMyDeviceManagerEvents, OnCommandCompleted)
+        /* [helpstring][id] */ HRESULT ( STDMETHODCALLTYPE *OnCommandCompleted )( 
+            IMyDeviceManagerEvents * This,
+            /* [in] */ BSTR commandId);
+        
         END_INTERFACE
     } IMyDeviceManagerEventsVtbl;
 
@@ -334,6 +350,9 @@ EXTERN_C const IID IID_IMyDeviceManagerEvents;
 
 #define IMyDeviceManagerEvents_OnDataEvent(This,data)	\
     ( (This)->lpVtbl -> OnDataEvent(This,data) ) 
+
+#define IMyDeviceManagerEvents_OnCommandCompleted(This,commandId)	\
+    ( (This)->lpVtbl -> OnCommandCompleted(This,commandId) ) 
 
 #endif /* COBJMACROS */
 

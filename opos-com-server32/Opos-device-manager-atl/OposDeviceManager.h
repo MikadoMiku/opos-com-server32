@@ -6,7 +6,6 @@
 #include <map>
 #include <string>
 
-
 #include "Oposdevicemanageratl_i.h"
 #include "_IOposDeviceManagerEvents_CP.h"
 
@@ -75,17 +74,11 @@ END_CONNECTION_POINT_MAP()
 	}
 
 	// Same methods as declared in the idl file
-	STDMETHOD(StartScanner)();
-	STDMETHOD(StopScanner)();
-	STDMETHOD(EnableDataEvent)(BSTR deviceId);
-	STDMETHOD(DisableDataEvent)(BSTR deviceId);
-
-	STDMETHOD(Fire_OnDataEvent)(BSTR bstrData) {
-		// Fire event
-		Fire_OnDataEvent(bstrData);
-		return S_OK;
-	}
-
+	STDMETHOD(StartScanner)(BSTR commandId);
+	STDMETHOD(StopScanner)(BSTR commandId);
+	STDMETHOD(EnableDataEvent)(BSTR deviceId, BSTR commandId);
+	STDMETHOD(DisableDataEvent)(BSTR deviceId, BSTR commandId);
+	HRESULT Fire_OnCommandCompleted(BSTR commandId);
 public:
 
 private:

@@ -3,7 +3,7 @@
 #include "pch.h"
 #include "FileLoggerr.h"
 
-STDMETHODIMP COposDeviceManager::EnableDataEvent(BSTR deviceId) {
+STDMETHODIMP COposDeviceManager::EnableDataEvent(BSTR deviceId, BSTR commandId) {
 	for (auto& device : devices_)
 	{
 		if (device.first == "USBScanner") {
@@ -12,10 +12,14 @@ STDMETHODIMP COposDeviceManager::EnableDataEvent(BSTR deviceId) {
 			break;
 		}
 	}
+	std::wstring ws(commandId);
+	std::string strCommandId(ws.begin(), ws.end());
+	Logger("OnCommandCompleted: " + strCommandId);
+	Fire_OnCommandCompleted(commandId);
 	return S_OK;
 }
 
-STDMETHODIMP COposDeviceManager::DisableDataEvent(BSTR deviceId) {
+STDMETHODIMP COposDeviceManager::DisableDataEvent(BSTR deviceId, BSTR commandId) {
 	for (auto& device : devices_)
 	{
 		if (device.first == "USBScanner") {
@@ -24,11 +28,46 @@ STDMETHODIMP COposDeviceManager::DisableDataEvent(BSTR deviceId) {
 			break;
 		}
 	}
+	std::wstring ws(commandId);
+	std::string strCommandId(ws.begin(), ws.end());
+	Logger("OnCommandCompleted: " + strCommandId);
+	Fire_OnCommandCompleted(commandId);
 	return S_OK;
 }
 
+HRESULT COposDeviceManager::Fire_OnCommandCompleted(BSTR commandId)
+{
+	HRESULT hr = S_OK;
+	CComPtr<IConnectionPointContainer> spCPC;
+	hr = this->QueryInterface(IID_IConnectionPointContainer, (void**)&spCPC);
+	if (SUCCEEDED(hr))
+	{
+		CComPtr<IConnectionPoint> spCP;
+		hr = spCPC->FindConnectionPoint(__uuidof(IMyDeviceManagerEvents), &spCP);
+		if (SUCCEEDED(hr))
+		{
+			CComPtr<IEnumConnections> spEnum;
+			hr = spCP->EnumConnections(&spEnum);
+			if (SUCCEEDED(hr))
+			{
+				CONNECTDATA cd = { 0 };
+				while (spEnum->Next(1, &cd, NULL) == S_OK)
+				{
+					IMyDeviceManagerEvents* pEvent = reinterpret_cast<IMyDeviceManagerEvents*>(cd.pUnk);
+					if (pEvent)
+					{
+						pEvent->OnCommandCompleted(commandId);
+						cd.pUnk->Release();
+					}
+				}
+			}
+		}
+	}
+	return hr;
+}
 
-STDMETHODIMP COposDeviceManager::StartScanner() {
+
+STDMETHODIMP COposDeviceManager::StartScanner(BSTR commandId) {
 	Logger("Scanner started...");
     // The existing code from DeviceManager::StartScanner goes here
     // Replace `this->StartScanner()` with `StartScanner()`
@@ -96,10 +135,14 @@ STDMETHODIMP COposDeviceManager::StartScanner() {
 
 
 	std::cout << "Scanner started." << std::endl;
+	std::wstring ws(commandId);
+	std::string strCommandId(ws.begin(), ws.end());
+	Logger("OnCommandCompleted: " + strCommandId);
+	Fire_OnCommandCompleted(commandId);
     return S_OK;
 }
 
-STDMETHODIMP COposDeviceManager::StopScanner() {
+STDMETHODIMP COposDeviceManager::StopScanner(BSTR commandId) {
 	OposScanner_CCO::IOPOSScannerPtr scannerSmartPtr = nullptr;
 
 	std::string scannerName = "USBScanner";
@@ -138,5 +181,9 @@ STDMETHODIMP COposDeviceManager::StopScanner() {
 	{
 		std::cout << "No scanner to stop." << std::endl;
 	}
+	std::wstring ws(commandId);
+	std::string strCommandId(ws.begin(), ws.end());
+	Logger("OnCommandCompleted: " + strCommandId);
+	Fire_OnCommandCompleted(commandId);
     return S_OK;
 }

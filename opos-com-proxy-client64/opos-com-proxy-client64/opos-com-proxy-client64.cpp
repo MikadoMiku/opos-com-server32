@@ -8,6 +8,7 @@
 #include <thread>
 #include <mutex>
 #include <queue>
+#include <napi.h>
 
 std::queue<std::string> commandQueue;
 std::mutex commandQueueMutex;
@@ -159,4 +160,42 @@ int main() {
 	return 0;
 }
 
+Napi::String Method(const Napi::CallbackInfo& info)
+{
+	Napi::Env env = info.Env();
+	return Napi::String::New(env, "world");
+}
 
+Napi::String StartMain(const Napi::CallbackInfo& info)
+{
+	main();
+	Napi::Env env = info.Env();
+	return Napi::String::New(env, "main started?");
+}
+
+Napi::Boolean DoCommand(const Napi::CallbackInfo& info) {
+	Napi::Env env = info.Env();
+
+	// Check if there is at least one argument and if the argument is a string
+	if (info.Length() < 1 || !info[0].IsString()) {
+		Napi::TypeError::New(env, "Expected a string as the first argument").ThrowAsJavaScriptException();
+		return Napi::Boolean::New(env, false);
+	}
+
+	// Convert the JavaScript string to a std::string
+	std::string command = info[0].As<Napi::String>().Utf8Value();
+
+	std::lock_guard<std::mutex> lock(commandQueueMutex);
+	commandQueue.push(command);
+}
+
+Napi::Object Init(Napi::Env env, Napi::Object exports)
+{
+	exports.Set(Napi::String::New(env, "hello"),
+		Napi::Function::New(env, Method));
+	exports.Set(Napi::String::New(env, "startMain"),
+		Napi::Function::New(env, StartMain));
+	return exports;
+}
+
+NODE_API_MODULE(hello, Init)

@@ -16,10 +16,10 @@ import "ocidl.idl";
 ]
 interface IOposDeviceManager : IDispatch
 {
-	HRESULT StartScanner();
-	HRESULT StopScanner();
-	HRESULT EnableDataEvent([in] BSTR deviceId);
-	HRESULT DisableDataEvent([in] BSTR deviceId);
+	HRESULT StartScanner([in] BSTR commandId);
+	HRESULT StopScanner([in] BSTR commandId);
+	HRESULT EnableDataEvent([in] BSTR deviceId, [in] BSTR commandId);
+	HRESULT DisableDataEvent([in] BSTR deviceId, [in] BSTR commandId);
 };
 [
 	uuid(FD22695F-84FF-427B-B763-B1DD8376E37E),
@@ -33,6 +33,8 @@ interface IOposDeviceManager : IDispatch
 interface IMyDeviceManagerEvents : IUnknown {
 	[id(1), helpstring("method OnDataEvent")]
 	HRESULT OnDataEvent([in] BSTR data);
+	[id(2), helpstring("method OnCommandCompleted")]
+	HRESULT OnCommandCompleted([in] BSTR commandId);
 };
 
 [
